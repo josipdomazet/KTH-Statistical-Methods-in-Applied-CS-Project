@@ -1,0 +1,1 @@
+results <- gibbs.sampler(num.iteration = 1)
