@@ -2,8 +2,9 @@
 # Function used to perform multinomial resampling
 # on the given probabilities in weights.vector
 #############################################################################
-multinomial.resampling <- function(weights.vector){
+multinomial.resampling <- function(weights.vector, N = NA){
   # generate N values between 0 and 1
+  N <- ifelse(is.na(N), length(weights.vector))
   N <- length(weights.vector)
   u <- rep(NA, N)
   u.tilda <- runif(N)^(1/(1:N))
@@ -36,8 +37,8 @@ multinomial.resampling <- function(weights.vector){
 # Function used to perform stratified resampling
 # on the given probabilities in weights.vector
 #############################################################################
-stratified.resampling <- function(weights.vector){
-  N <- length(weights.vector)
+stratified.resampling <- function(weights.vector, N = NA){
+  N <- ifelse(is.na(N), length(weights.vector))
   output <- rep(NA, N)
   
   total <- weights.vector[1]

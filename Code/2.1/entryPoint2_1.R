@@ -1,16 +1,16 @@
 library(MCMCpack) # dirichet distribution
 library(ggplot2) # vizualizations
 library(magrittr) # %>%
-
+library(tibble)
 # import functions
 source("util.R")
 
 # Question 1
 # Specify arbitrary parameters
-N <-5
+N <- 5
 alphabet <-  c("a", "b", "c", "d")
-M <- 30
-W<- 10
+M <- 20
+W<- 8
 K <- 4
 alpha.bg <-  c(1, 1, 1, 1)
 alpha.mw<- c(0.8 ,0.8, 0.8, 0.8)
@@ -29,29 +29,31 @@ part1.mw.prob <- lgamma(sum(alpha.mw)) - lgamma(N*W + sum(alpha.mw))
 loggamma.mw <- lgamma(alpha.mw)
 loggamma.bg <- lgamma(alpha.bg)
 
-num.chains <- 10
+num.chains <- 15
 all.chains <- matrix(nrow = 0, ncol = N)
 #results.gibbs <- gibbs.sampler(gen.data.list$data, alphabet,  150, N, M, W, length(alphabet), alpha.bg, alpha.mw)
 # 1 gibbs.sampler returns 1 chain which was initialized randomly
 # but I need to have multiple chains because the initial state is important
 for(c in 1:num.chains){
-  all.chains <- rbind(all.chains, gibbs.sampler(gen.data.list$data, alphabet, 500, N, M, W, length(alphabet), alpha.bg, alpha.mw))
+  all.chains <- rbind(all.chains, gibbs.sampler(gen.data.list$data, alphabet, 300, N, M, W, length(alphabet), alpha.bg, alpha.mw))
 }
 
-tibble(counts = as.matrix(all.chains[, 1])) %>% ggplot(aes(x = counts)) + geom_bar() +
+# visualise
+tibble(counts = as.matrix(all.chains[500:nrow(all.chains),5])) %>% ggplot(aes(x = counts)) + geom_bar() +
+  scale_x_continuous(labels = 1:(M - W + 1), breaks = 1:(M - W + 1)) + xlab("position")
+ggsave("seq12.png")
+
+k <- 10
+tibble(counts = as.matrix(all.chains[(10 + (k-1)*(300)+1):(k*300), 2])) %>% ggplot(aes(x = counts)) + geom_bar() +
   scale_x_continuous(labels = 1:(M - W + 1), breaks = 1:(M - W + 1))
 
-k <- 8
+# turn into tibble
+starting.positions.chains <- as_tibble(all.chains)
+mutated <- starting.positions.chains %>% rowwise %>% dplyr::mutate(mse = mean((c(V1, V2, V3, V4, V5) - starts)^2))
 
-tibble(counts = as.matrix(all.chains[((k-1)*(501)+1):(k*501)])) %>% ggplot(aes(x = counts)) + geom_bar() +
-  scale_x_continuous(labels = 1:(M - W + 1), breaks = 1:(M - W + 1))
-
-
-
-
-
-
-
+mutated$id <- 1:nrow(mutated)
+mutated %>% filter(between(id, 0, 310)) %>% ggplot(aes(x = id ,y = mse)) + 
+                     geom_line()
 ### Real task
 my.data <- fread("data_q2/input.csv", sep = " ", stringsAsFactors = T, header = F, nrows = 25) %>% as.matrix()
 K <- 4 # alphabet
