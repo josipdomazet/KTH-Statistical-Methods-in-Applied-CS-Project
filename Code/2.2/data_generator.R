@@ -5,7 +5,7 @@ generate_data <- function(fi, sigma, beta, total_len){
   library(tibble)
   
   results <- tibble(x = numeric(), y = numeric(), t = numeric())
-  x <- rnorm(1, 0, sigma) # x1
+  x <- rnorm(1, 0, sigma)
   y <- rnorm(1, 0, sqrt(beta^2 * exp(x)))
   results <- tibble::add_row(results, x = x, y = y, t = 1)
   for(i in 2:total_len){
